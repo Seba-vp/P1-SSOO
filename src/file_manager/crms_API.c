@@ -6,7 +6,7 @@
 
 // Import the header file of this module
 #include "crms_API.h"
-extern char route_bin_file[1000];
+extern char route_bin_file[256];
 
 //FUNCIONES GENERALES
 
@@ -32,6 +32,25 @@ void cr_mount(char* memory_path)
 void cr_ls_processes()
 {
     /* Funcion que muestra en pantalla los procesos en ejecución. */
+    unsigned int buffer_estado = 0;
+    unsigned int buffer_id = 0;
+    unsigned char* buffer_nombre[12];
+    FILE* file = fopen(route_bin_file, "rb");
+    for (int i = 0; i < 16; i++)
+    {
+        fseek(file, 256*i, SEEK_SET);
+        fread(&buffer_estado, 1, 1, file);
+        if (buffer_estado == 1)
+        {
+            fseek(file, 256*i + 1, SEEK_SET);
+            fread(&buffer_id, 1, 1, file);
+            fseek(file, 256*i + 2, SEEK_SET);
+            fread(&buffer_nombre, sizeof(unsigned char), 12, file);
+            printf("ID: %d\n", buffer_id);
+            printf("Nombre proceso: %s\n", &buffer_nombre);
+        } 
+    }
+    fclose(file);
 }
 
 int cr_exists(int process_id, char* file_name)

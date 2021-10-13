@@ -2,7 +2,7 @@
 #pragma once
 
 //Global variables
-char route_bin_file[1000];
+char route_bin_file[256];
 
 // Define the struct
 typedef struct CrmsFile {
