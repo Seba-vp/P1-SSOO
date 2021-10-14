@@ -47,7 +47,8 @@ void cr_ls_processes()
             fseek(file, 256*i + 2, SEEK_SET);
             fread(&buffer_nombre, sizeof(unsigned char), 12, file);
             printf("ID: %d\n", buffer_id);
-            printf("Nombre proceso: %s\n", &buffer_nombre);
+            char* foo = (char*) buffer_nombre;
+            printf("Nombre proceso: %s\n", foo);
         } 
     }
     fclose(file);
@@ -58,8 +59,49 @@ int cr_exists(int process_id, char* file_name)
     /* Funcion para ver si un archivo con nombre file
     name existe en la memoria del proceso con id process id. 
     Retorna 1 si existe y 0 en caso contrario. */
-    return 1;
-    return 0;
+
+    //Buscamos el proceso
+    unsigned int buffer_estado = 0;
+    unsigned int buffer_id = 0;
+    unsigned char* buffer_nombre_archivo[12];
+    FILE* file = fopen(route_bin_file, "rb");
+    for (int i = 0; i < 16; i++)
+    {
+        fseek(file, 256*i, SEEK_SET);
+        fread(&buffer_estado, 1, 1, file);
+        if (buffer_estado == 1)
+        {
+            fseek(file, 256*i + 1, SEEK_SET);
+            fread(&buffer_id, 1, 1, file);
+            if (buffer_id == process_id)
+            {
+                for (int j = 0; j < 10; j++)
+                //Buscamos el archivo
+                {
+                    unsigned int buffer_validez = 0;
+                    fseek(file, 256*i + 14 + 21*j, SEEK_SET);
+                    fread(&buffer_validez, 1, 1, file);
+                    if (buffer_validez == 1)
+                    {
+                        fseek(file, 256*i + 14 + 21*j + 1, SEEK_SET);
+                        fread(&buffer_nombre_archivo, sizeof(unsigned char), 12, file);
+
+                        if (memcmp(buffer_nombre_archivo, file_name, 12) == 0)
+                        {
+                            printf("Existe este archivo en este proceso\n");
+                            fclose(file);
+                            return 1;
+                        }
+                    }
+                    
+                }
+                fclose(file);
+                return 0;
+                
+            }
+        }  
+    }
+return 0;   
 }
 
 void cr_ls_files(int process_id)
@@ -67,6 +109,42 @@ void cr_ls_files(int process_id)
     /*Funcion para listar los archivos dentro de la memoria del proceso. 
     Imprime en pantalla los nombres de todos los archivos presentes en la memoria 
     del proceso con id process id. */
+    //Buscamos el proceso
+    unsigned int buffer_estado = 0;
+    unsigned int buffer_id = 0;
+    unsigned char* buffer_nombre_archivo[12];
+    FILE* file = fopen(route_bin_file, "rb");
+    for (int i = 0; i < 16; i++)
+    {
+        fseek(file, 256*i, SEEK_SET);
+        fread(&buffer_estado, 1, 1, file);
+        if (buffer_estado == 1)
+        {
+            fseek(file, 256*i + 1, SEEK_SET);
+            fread(&buffer_id, 1, 1, file);
+            if (buffer_id == process_id)
+            {
+                for (int j = 0; j < 10; j++)
+                //Buscamos el archivo
+                {
+                    unsigned int buffer_validez = 0;
+                    fseek(file, 256*i + 14 + 21*j, SEEK_SET);
+                    fread(&buffer_validez, 1, 1, file);
+                    if (buffer_validez == 1)
+                    {
+                        fseek(file, 256*i + 14 + 21*j + 1, SEEK_SET);
+                        fread(&buffer_nombre_archivo, sizeof(unsigned char), 12, file);
+                        char* S1 = (char*) (buffer_nombre_archivo);
+                        printf("Nombre archivo: %s\n", S1);
+                    }
+                    
+                }
+                 
+            }
+        }  
+    }
+    fclose(file);
+
 }
 
 
